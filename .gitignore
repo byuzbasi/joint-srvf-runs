@@ -1,0 +1,7 @@
+/database_nifti/
+/runs/
+/.venv/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.DS_Store
