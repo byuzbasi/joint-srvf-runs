@@ -149,7 +149,7 @@ def tangent_fpca(q_aligned, mu, logarithm, n_modes=3, endpoint_duplicated=False)
     return {'mu': mu, 'tangent_vectors': vectors,
             'pcs': Vt[:count]/root_weights, 'scores': U[:, :count]*S[:count],
             'singular_values': S[:count], 'n_modes': count,
-            'all_eigenvalues': S**2/max(len(vectors)-1, 1)}
+            'all_eigenvalues': S**2 / len(vectors)}
 
 
 def joint_mode_curves(mu, q_aligned, reference, fpca, exponential,

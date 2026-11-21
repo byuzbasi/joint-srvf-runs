@@ -129,9 +129,9 @@ def load(branch, target, pilot=False, dp_batch=None):
         srvf_fpca_payload['all_eigenvalues'], 3)['explained_variance_percent'].values
 ''' + marker)
     else:
-        source = replace_once(source, '    # Preserve the original sample-variance', '''    variance_table(payload['all_eigenvalues'], 10).to_csv(
+        source = replace_once(source, '    # Report the eigenvalues', '''    variance_table(payload['all_eigenvalues'], 10).to_csv(
         TAB_DIR / 'srvf_tangent_fpca_variance_explained_first10.csv', index=False)
-    # Preserve the original sample-variance''')
+    # Report the eigenvalues''')
         marker = '                metrics = evaluate_regression(pred_test, ys)'
         source = replace_once(source, marker, '''                record_predictions(pred_dir, 'regression', outcome, model_name,
                                    meta_test.loc[valid_test, 'patient_id'], ys, pred_test)

@@ -1,6 +1,6 @@
 # Joint elastic analysis of ventricular contours and thickness profiles
 
-Run code for the synthetic study and the CAMUS application in *Joint Elastic Analysis of Ventricular Contours and Image-Derived Thickness Profiles*.
+Run code for *Joint Elastic Analysis of Ventricular Contours and Image-Derived Thickness Profiles*. This revision corrects the synthetic periodic grid and inverse SRVF scale restoration. Tangent FPCA reports eigenvalues with divisor $n$. The completed synthetic run supplies the results in the manuscript.
 
 ## Environment and data
 
@@ -10,13 +10,21 @@ Download the NIfTI release from the [CAMUS public collection](https://humanheart
 
 ## Setup and small execution checks
 
-After cloning, run these commands from the clone's parent directory.
+Clone the repository using the directory name shown below, or extract the
+study archive into the same directory.
 
 ```sh
-cd joint-srvf-runs
+git clone https://github.com/byuzbasi/joint-srvf-runs.git srvf_joint_v21
+```
+
+Run the following commands from its parent directory.
+
+```sh
+cd srvf_joint_v21
 python3.13 -m venv .venv
 . .venv/bin/activate
 python -m pip install -r requirements.txt
+python tests/test_numerical_corrections.py
 python code/run.py pilot synthetic synthetic-pilot
 python code/run.py pilot camus camus-pilot
 python code/run.py verify synthetic synthetic-pilot
@@ -28,39 +36,71 @@ The pilots use a reduced grid. The CAMUS pilot checks the complete input cohort 
 ## Reproduce the study
 
 ```sh
-cd joint-srvf-runs
+cd srvf_joint_v21
 . .venv/bin/activate
-python code/run.py run synthetic synthetic-study
+python code/run.py run synthetic synthetic-v19
 python code/run.py run camus camus-study --workers 4
 ```
 
-The synthetic run has 10 replicates of 50 curves and 700 lambda-by-fold evaluations. CAMUS uses the fixed 350/150 split with 450 lambda-by-fold evaluations, including the fold-local representations used for tuning. On the original four-worker setup, CAMUS took about 2.1 hours. The serial synthetic run took about 3.8 hours. Runtime depends on the machine.
+The synthetic run has 10 replicates of 50 curves and 700 lambda-by-fold evaluations. CAMUS uses the fixed 350/150 split with 450 lambda-by-fold evaluations, including the fold-local representations used for tuning. On the original four-worker setup, CAMUS took about 2.1 hours. The serial synthetic run took 3 hours 36 minutes. Runtime depends on the machine.
 
 Run these commands in a second terminal to inspect progress.
 
 ```sh
-cd joint-srvf-runs
+cd srvf_joint_v21
 . .venv/bin/activate
-python code/run.py status synthetic synthetic-study
+python code/run.py status synthetic synthetic-v19
 python code/run.py status camus camus-study
 ```
 
 To resume an interrupted run, keep its run ID and worker count and use the matching command below. Resume uses verified lambda-by-fold checkpoints. Work between checkpoints can be repeated.
 
 ```sh
-cd joint-srvf-runs
+cd srvf_joint_v21
 . .venv/bin/activate
-python code/run.py resume synthetic synthetic-study
+python code/run.py resume synthetic synthetic-v19
 python code/run.py resume camus camus-study --workers 4
 ```
 
 Verify the output and read the diagnostic record after each run.
 
 ```sh
-cd joint-srvf-runs
+cd srvf_joint_v21
 . .venv/bin/activate
-python code/run.py verify synthetic synthetic-study
+python code/run.py verify synthetic synthetic-v19
 python code/run.py verify camus camus-study
 ```
 
-Each run writes to `runs/<run-id>`. Its manifest identifies the attempt and inventories the figures, tables, prediction files and diagnostics under that attempt. The synthetic alignment and tangent FPCA tables support manuscript Tables 2 and 3. CAMUS metadata, alignment, tangent modes, predictions and subgroup summaries support Tables 4 through 8. The `figures` directory contains the analysis figures that underlie the manuscript panels. `diagnostics.json` records sphere-mean tolerances and model convergence warnings. Treat CAMUS-generated patient-level outputs according to the provider's reuse terms.
+Each run writes to `runs/<run-id>`. The run manifest identifies the
+attempt and inventories figures, tables, diagnostics, and CV checkpoints.
+A revised synthetic run needs a new run ID because the earlier generator
+has a different signature.
+
+| Manuscript table | Run | Output CSV |
+|---|---|---|
+| 2. Synthetic alignment | Synthetic | `synthetic_alignment_repeated_summary.csv` |
+| 3. Synthetic tangent FPCA | Synthetic | `synthetic_srvf_tangent_fpca_error_results.csv` |
+| 4. CAMUS cohort characteristics | CAMUS | `clinical_cohort_summary.csv` |
+| 5. CAMUS alignment | CAMUS | `alignment_repeated_results.csv` |
+| 6. CAMUS training tangent-mode variance | CAMUS | `srvf_tangent_fpca_variance_explained_first10.csv` |
+| 7. CAMUS exploratory cluster summaries | CAMUS | `normal_EF_cluster_comparison_simplified.csv` |
+
+`synthetic_fpca_comparison_results.csv` gives the component RMS
+comparisons. The earlier CAMUS analysis provides the reported angular
+alignment and cluster results. The first ten absolute CAMUS eigenvalues
+in the manuscript are the historical archive values multiplied by
+$349/350$. The runner in this package already uses divisor $n$. The archived CAMUS runner also computes exploratory EF
+regression and classification. Treat generated patient-level outputs
+according to the provider's reuse terms.
+
+## Manuscript figures
+
+Figure 2 uses the first completed synthetic sample, which selected
+$\lambda=0.005$. Figures 3 and 4 use the same sample and share a display
+map for the gray observations, mean, and joint mode curves. The raw
+comparison plots from the study runner use subject-specific restoration
+for the gray observations. Use the accompanying figure materials
+(`srvf_joint_fpca_figures.zip`) and their README to rebuild the manuscript
+panels from the saved vectors. The figure materials also include the script
+used to regenerate those vectors from the first sample with existing CV
+checkpoints.
