@@ -14,13 +14,13 @@ Clone the repository using the directory name shown below, or extract the
 study archive into the same directory.
 
 ```sh
-git clone https://github.com/byuzbasi/joint-srvf-runs.git srvf_joint_v21
+git clone https://github.com/byuzbasi/joint-srvf-runs.git srvf_joint_v23
 ```
 
 Run the following commands from its parent directory.
 
 ```sh
-cd srvf_joint_v21
+cd srvf_joint_v23
 python3.13 -m venv .venv
 . .venv/bin/activate
 python -m pip install -r requirements.txt
@@ -36,7 +36,7 @@ The pilots use a reduced grid. The CAMUS pilot checks the complete input cohort 
 ## Reproduce the study
 
 ```sh
-cd srvf_joint_v21
+cd srvf_joint_v23
 . .venv/bin/activate
 python code/run.py run synthetic synthetic-v19
 python code/run.py run camus camus-study --workers 4
@@ -47,7 +47,7 @@ The synthetic run has 10 replicates of 50 curves and 700 lambda-by-fold evaluati
 Run these commands in a second terminal to inspect progress.
 
 ```sh
-cd srvf_joint_v21
+cd srvf_joint_v23
 . .venv/bin/activate
 python code/run.py status synthetic synthetic-v19
 python code/run.py status camus camus-study
@@ -56,7 +56,7 @@ python code/run.py status camus camus-study
 To resume an interrupted run, keep its run ID and worker count and use the matching command below. Resume uses verified lambda-by-fold checkpoints. Work between checkpoints can be repeated.
 
 ```sh
-cd srvf_joint_v21
+cd srvf_joint_v23
 . .venv/bin/activate
 python code/run.py resume synthetic synthetic-v19
 python code/run.py resume camus camus-study --workers 4
@@ -65,7 +65,7 @@ python code/run.py resume camus camus-study --workers 4
 Verify the output and read the diagnostic record after each run.
 
 ```sh
-cd srvf_joint_v21
+cd srvf_joint_v23
 . .venv/bin/activate
 python code/run.py verify synthetic synthetic-v19
 python code/run.py verify camus camus-study
@@ -92,6 +92,29 @@ in the manuscript are the historical archive values multiplied by
 $349/350$. The runner in this package already uses divisor $n$. The archived CAMUS runner also computes exploratory EF
 regression and classification. Treat generated patient-level outputs
 according to the provider's reuse terms.
+
+## CAMUS subgroup described alongside Table 7
+
+From the parent directory of the extracted code or checkout, use the completed
+CAMUS run and the original NIfTI release to reproduce the descriptive counts.
+
+```sh
+cd srvf_joint_v23
+python3 analysis/describe_clusters.py runs/camus-study database_nifti
+```
+
+The first argument is the completed run directory containing `manifest.json`.
+The script reads the split and test cluster assignments from the attempt named
+in that manifest and verifies their file hashes. The second argument is the
+CAMUS directory containing the original two-chamber metadata files
+(`patient*/Info_2CH.cfg`). Substitute the paths to these directories if your
+run has another name or your data are stored elsewhere.
+
+The command uses only the Python standard library and prints aggregate JSON.
+For the 52 test patients with EF of at least 50%, it reports cluster sizes,
+mean EF, median age, sex and image-quality counts. It also counts distinct EF
+values, lists the values observed in both clusters and counts patients with
+any one of those shared values. Each patient has one cluster assignment.
 
 ## Manuscript figures
 
